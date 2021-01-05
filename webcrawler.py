@@ -1,4 +1,21 @@
 import urllib.request
+import os
+
+
+def download_website(link, target_directory):
+
+    normalized_link = link
+    if not link.startswith("https://www."):
+        normalized_link = "https://www." + link
+
+    site_handle = urllib.request.urlopen(normalized_link)
+    site_data = site_handle.read()
+
+    site_handle.close()
+
+    with open(target_directory, "wb+") as file:
+        file.write(site_data)
+    print(link, "OK")
 
 
 def get_site_countries():
@@ -41,6 +58,17 @@ def get_site_names(country):
     return site_list
 
 
-if __name__ == "__main__":
+def main():
+    country_code = "RO"
+
     print(get_site_countries())
-    print(get_site_names("RO"))
+    sites = get_site_names(country_code)
+
+    for link in sites:
+        target_directory = os.path.join(os.getcwd(), "sites\\", country_code, link + ".html")
+        print(link)
+        download_website(link, target_directory)
+
+
+if __name__ == "__main__":
+    main()
