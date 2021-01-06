@@ -1,14 +1,17 @@
 import webcrawler  # this is my own py file
 import utils  # this is my own python file
 import pika
+import json
 
 WORKER_LOG_FILE = "worker_log.txt"
 
 
 def sites_callback(ch, method, properties, body):
     str_body = body.decode('utf-8')
-    buff = str_body.split("~")
-    directory, link = buff[0], buff[1].lower()
+
+    buff = json.loads(str_body)
+
+    directory, link = buff["dir"], buff["link"].lower()
 
     utils.report_message("Received command: [" + link + ", " + directory + "]", WORKER_LOG_FILE)
 

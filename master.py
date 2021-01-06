@@ -3,6 +3,7 @@ import utils  # this is my own python file
 import pika
 import os
 import shutil
+import json
 
 MASTER_LOG_FILE = "master_log.txt"
 
@@ -43,12 +44,15 @@ def main():
             target_directory = os.path.join(os.getcwd(), "sites\\", country_code, link + ".html")
             # webcrawler.download_website(link, target_directory)
 
-            message = target_directory + '~' + link
-            channel.basic_publish(exchange='', routing_key='PythonMaster', body=message)
+            message = {"dir": target_directory, "link": link}
+
+            channel.basic_publish(exchange='', routing_key='PythonMaster', body=json.dumps(message))
 
             utils.report_message("Sent [" + link + ", " + target_directory + "]", MASTER_LOG_FILE)
 
         utils.report_message("Country: " + country + " OK", MASTER_LOG_FILE)
+
+        break
 
     blocker = input("Blocker master, enter any value to exit\n")
 
