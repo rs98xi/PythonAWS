@@ -1,5 +1,8 @@
 import webcrawler  # this is my own py file
+import utils  # this is my own python file
 import pika
+
+WORKER_LOG_FILE = "worker_log.txt"
 
 
 def sites_callback(ch, method, properties, body):
@@ -7,16 +10,19 @@ def sites_callback(ch, method, properties, body):
     buff = str_body.split("~")
     directory, link = buff[0], buff[1].lower()
 
-    print("Received command: [" + link + ", " + directory + "]")
+    utils.report_message("Received command: [" + link + ", " + directory + "]", WORKER_LOG_FILE)
 
     if "google" in link or "facebook" in link or "youtube" in link:
         # this is here because i don't want to get banned for accessing adult content on work VPN :)
-        webcrawler.download_website(link, directory)
+        webcrawler.download_website(link, directory, WORKER_LOG_FILE)
 
-        print("Downloaded link:", link)
+        utils.report_message("Downloaded link: " + link, WORKER_LOG_FILE)
+    else:
+        utils.report_message("Link blacklisted: " + link, WORKER_LOG_FILE)
 
 
 def main():
+    utils.clean_up_logs(WORKER_LOG_FILE)
 
     connection = pika.BlockingConnection()
     channel = connection.channel()
@@ -34,5 +40,5 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print('Interrupted')
+        utils.report_message('Interrupted', WORKER_LOG_FILE)
         exit(0)

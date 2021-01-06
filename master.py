@@ -1,10 +1,14 @@
 import webcrawler  # this is my own py file
+import utils  # this is my own python file
 import pika
 import os
 import shutil
 
+MASTER_LOG_FILE = "master_log.txt"
+
 
 def clean_up_directory():
+
     if os.path.exists("sites"):
         shutil.rmtree("sites")
 
@@ -14,8 +18,9 @@ def clean_up_directory():
 def main():
 
     clean_up_directory()
+    utils.clean_up_logs(MASTER_LOG_FILE)
 
-    country_list = webcrawler.get_site_countries()
+    country_list = webcrawler.get_site_countries(MASTER_LOG_FILE)
 
     connection = pika.BlockingConnection()
     channel = connection.channel()
@@ -23,7 +28,7 @@ def main():
     channel.queue_declare(queue='PythonMaster')
 
     for country in country_list:
-        site_list = webcrawler.get_site_names(country)
+        site_list = webcrawler.get_site_names(country, MASTER_LOG_FILE)
 
         number_of_sites = len(site_list)
 
@@ -41,9 +46,9 @@ def main():
             message = target_directory + '~' + link
             channel.basic_publish(exchange='', routing_key='PythonMaster', body=message)
 
-            print("Sent [" + link + ", " + target_directory + "]")
+            utils.report_message("Sent [" + link + ", " + target_directory + "]", MASTER_LOG_FILE)
 
-        print("Country:", country, "OK")
+        utils.report_message("Country: " + country + " OK", MASTER_LOG_FILE)
 
     blocker = input("Blocker master, enter any value to exit\n")
 
@@ -54,5 +59,5 @@ if __name__ == '__main__':
     try:
         main()
     except KeyboardInterrupt:
-        print('Interrupted')
+        utils.report_message('Interrupted', MASTER_LOG_FILE)
         exit(0)
