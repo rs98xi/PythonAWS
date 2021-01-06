@@ -10,6 +10,7 @@ def sites_callback(ch, method, properties, body):
     print("Received command: [" + link + ", " + directory + "]")
 
     if "google" in link or "facebook" in link or "youtube" in link:
+        # this is here because i don't want to get banned for accessing adult content on work VPN :)
         webcrawler.download_website(link, directory)
 
         print("Downloaded link:", link)
