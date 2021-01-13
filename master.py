@@ -99,7 +99,6 @@ def main():
 
         utils.report_message("Country: " + country + " OK", MASTER_LOG_FILE)
 
-        break
 
     """
     This input is for blocking the master to force close the connection
